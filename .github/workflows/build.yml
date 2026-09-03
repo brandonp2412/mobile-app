@@ -23,11 +23,13 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: 'true'
+          persist-credentials: false
 
       - name: 🏗 Setup Node
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: 22.x
+          package-manager-cache: false
 
       - name: 🏗 Setup Expo and EAS
         uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8.2.1
@@ -44,8 +46,9 @@ jobs:
         run: npm run prebuild
 
       - name: 👷 Build expo app
-        run: |
-          eas build --local --non-interactive --output ./${{ github.ref_type == 'tag' && format('seerr-{0}.apk', github.ref_name) || 'seerr.apk' }} --platform android --profile production
+        env:
+          OUTPUT_FILE: ${{ github.ref_type == 'tag' && format('seerr-{0}.apk', github.ref_name) || 'seerr.apk' }}
+        run: eas build --local --non-interactive --output "./${OUTPUT_FILE}" --platform android --profile production
 
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -60,11 +63,13 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: 'true'
+          persist-credentials: false
 
       - name: 🏗 Setup Node
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: 22.x
+          package-manager-cache: false
 
       - name: 🏗 Setup Expo and EAS
         uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8.2.1
@@ -81,8 +86,9 @@ jobs:
         run: npm run prebuild:tv
 
       - name: 👷 Build expo app
-        run: |
-          eas build --local --non-interactive --output ./${{ github.ref_type == 'tag' && format('seerr-tv-{0}.apk', github.ref_name) || 'seerr-tv.apk' }} --platform android --profile production
+        env:
+          OUTPUT_FILE: ${{ github.ref_type == 'tag' && format('seerr-tv-{0}.apk', github.ref_name) || 'seerr-tv.apk' }}
+        run: eas build --local --non-interactive --output "./${OUTPUT_FILE}" --platform android --profile production
 
       - name: 📦 Upload APK artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -97,11 +103,13 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: 'true'
+          persist-credentials: false
 
       - name: 🏗 Setup Node
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: 22.x
+          package-manager-cache: false
 
       - name: 🔧 Setup Xcode
         uses: maxim-lobanov/setup-xcode@60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
@@ -123,8 +131,9 @@ jobs:
         run: npm run prebuild
 
       - name: 👷 Build expo app
-        run: |
-          eas build --local --non-interactive --output ./${{ github.ref_type == 'tag' && format('seerr-{0}.ipa', github.ref_name) || 'seerr.ipa' }} --platform ios --profile production
+        env:
+          OUTPUT_FILE: ${{ github.ref_type == 'tag' && format('seerr-{0}.ipa', github.ref_name) || 'seerr.ipa' }}
+        run: eas build --local --non-interactive --output "./${OUTPUT_FILE}" --platform ios --profile production
 
       - name: 📦 Upload IPA artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -147,6 +156,7 @@ jobs:
         with:
           submodules: 'true'
           fetch-depth: 0
+          persist-credentials: false
 
       - name: 📥 Fetch artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -165,7 +175,7 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
 
       - name: 🚀 Create GitHub Release
-        run: gh release create ${GITHUB_REF_NAME} -t "Release ${GITHUB_REF_NAME}" -n "${RELEASE_BODY}" ./seerr*.apk ./seerr*.ipa
+        run: gh release create "$GITHUB_REF_NAME" -t "Release ${GITHUB_REF_NAME}" -n "$RELEASE_BODY" ./seerr*.apk ./seerr*.ipa
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           RELEASE_BODY: ${{ steps.changelog.outputs.content }}
